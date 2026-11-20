@@ -1,0 +1,9 @@
+# Python libraries of the project. Install from Spyder's IPython console:
+#     %pip install -r requirements.txt
+# Versions are fixed (==) so everyone installs exactly the same ones.
+# They work from Python 3.8 to 3.13 (some team computers have an older Anaconda).
+# Each step adds what it needs, with a comment saying who and why.
+
+psycopg[binary]==3.2.13   # connect to PostgreSQL from Python (everyone)
+python-dotenv==1.0.1      # read the .env settings file (everyone)
+httpx==0.28.1             # download from the OpenAlex API (Juliette, ingestion)
