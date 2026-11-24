@@ -1,23 +1,32 @@
-"""
-STORE cleaned papers in PostgreSQL
-"""
-
 from psycopg.types.json import Jsonb
 
 SAVE_AUTHOR = """
 INSERT INTO authors (id, name, affiliation)
+VALUES (%(id)s, %(name)s, %(affiliation)s)
+ON CONFLICT (id) DO UPDATE SET
+    name        = EXCLUDED.name,
+    affiliation = COALESCE(EXCLUDED.affiliation, authors.affiliation)
 """
 
 SAVE_WORK = """
-INSERT INTO works (id, doi, title, abstract, publication_year, cited_by_count, type, landing_page_url, pdf_url, raw_json)
+INSERT INTO works (id, doi, title, abstract, publication_year, cited_by_count, type,
+                   landing_page_url, pdf_url, raw_json)
+VALUES (%(id)s, %(doi)s, %(title)s, %(abstract)s, %(publication_year)s, %(cited_by_count)s,
+        %(type)s, %(landing_page_url)s, %(pdf_url)s, %(raw_json)s)
+ON CONFLICT (id) DO UPDATE SET
+    doi = EXCLUDED.doi, title = EXCLUDED.title, abstract = EXCLUDED.abstract,
+    publication_year = EXCLUDED.publication_year, cited_by_count = EXCLUDED.cited_by_count,
+    type = EXCLUDED.type, landing_page_url = EXCLUDED.landing_page_url,
+    pdf_url = EXCLUDED.pdf_url, raw_json = EXCLUDED.raw_json
 """
 
 SAVE_LINK = """
 INSERT INTO work_authors (work_id, author_id, author_position)
+VALUES (%(work_id)s, %(author_id)s, %(author_position)s)
+ON CONFLICT (work_id, author_id) DO UPDATE SET author_position = EXCLUDED.author_position
 """
 
-#papers ckeaned from nomalize.py 
-#multiple authors => 1 
+
 def save_page(conn, papers):
     authors = {}
     for paper in papers:
@@ -30,13 +39,13 @@ def save_page(conn, papers):
     works = [dict(paper.work, raw_json=Jsonb(paper.work["raw_json"])) for paper in papers]
     links = [link for paper in papers for link in paper.links]
 
-    with conn.transaction(): 
+    with conn.transaction():
         with conn.cursor() as cur:
             cur.executemany(SAVE_AUTHOR, list(authors.values()))
             cur.executemany(SAVE_WORK, works)
             cur.executemany(SAVE_LINK, links)
 
-#numbers check what is stored 
+
 def count_rows(conn):
     row = conn.execute("""
         SELECT (SELECT count(*) FROM works),
