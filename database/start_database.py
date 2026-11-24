@@ -62,9 +62,18 @@ docker = shutil.which("docker", path=env["PATH"])
 if docker is None:
     raise RuntimeError("Docker was not found. Please verify if you have the app and wether its opened or not, engine running")
 
+#Docker Compose exists in 2 forms: "docker compose" (new, part of Docker Desktop)
+#or "docker-compose" (old, separate program). We use whichever this computer has.
+if subprocess.run([docker, "compose", "version"], env=env, capture_output=True).returncode == 0:
+    COMPOSE = [docker, "compose"]
+elif shutil.which("docker-compose", path=env["PATH"]):
+    COMPOSE = [shutil.which("docker-compose", path=env["PATH"])]
+else:
+    raise RuntimeError("Docker Compose was not found (neither 'docker compose' nor 'docker-compose').")
+
 print("Starting the database")
 
-result = subprocess.run([docker, "compose", "up", "-d"], cwd=PROJECT, env=env,
+result = subprocess.run(COMPOSE + ["up", "-d"], cwd=PROJECT, env=env,
                         capture_output=True, text=True)
 print((result.stdout + result.stderr).strip())
 if result.returncode != 0:
