@@ -7,3 +7,11 @@
 psycopg[binary]==3.2.13   # connect to PostgreSQL from Python (everyone)
 python-dotenv==1.0.1      # read the .env settings file (everyone)
 httpx==0.28.1             # download from the OpenAlex API (Juliette, ingestion)
+
+# --- Semantic search (Maple): BGE-M3 embeddings + multi-route recall ---
+# PyTorch first, ideally with CUDA if you have an NVIDIA GPU:
+#     https://pytorch.org/get-started/locally/   (CPU-only also works, just slower)
+FlagEmbedding==1.4.2      # BGE-M3 dense + sparse vectors, bge-reranker (Maple, search)
+transformers==5.23.0      # used by FlagEmbedding (fixed to the tested version)
+huggingface-hub==2.4.0    # downloads the model once (Maple, search)
+numpy==2.5.5
