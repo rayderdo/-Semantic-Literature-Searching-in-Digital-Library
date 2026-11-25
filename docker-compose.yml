@@ -1,0 +1,36 @@
+# The project database: PostgreSQL 16 with the pgvector extension, run by Docker.
+#
+# Why Docker: all 5 of us get exactly the same database (pgvector included, to store
+# the embedding vectors) without installing PostgreSQL by hand.
+# You do not need to type Docker commands: database/start_database.py runs them.
+#
+# Values like ${POSTGRES_USER:-postgres} come from .env, with a default value after ":-".
+
+services:
+  db:
+    # Official image = PostgreSQL 16 + pgvector. Source: https://github.com/pgvector/pgvector#docker
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-semantic_search}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"     # your computer's port : the container's port
+    volumes:
+      # Named volume: the data survives when the database or the computer restarts.
+      - pgdata:/var/lib/postgresql/data
+      # The .sql files in database/sql/ (the schema, next step) run automatically
+      # the FIRST time the database starts (empty volume only).
+      # Source: official postgres image docs, "Initialization scripts",
+      # https://hub.docker.com/_/postgres
+      - ./database/sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # Docker reports "healthy" once PostgreSQL accepts connections.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

@@ -1,0 +1,27 @@
+# Files git/GitHub must never store.
+
+# Secrets: personal settings and API keys. Only .env.example is shared.
+.env
+
+# Database dumps: shared on the team Google Drive (too big for GitHub).
+*.dump
+
+# Python: virtual environments and caches (re-created automatically).
+.venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Spyder / editors (personal settings).
+.spyproject/
+.vscode/
+.idea/
+
+# Frontend dependencies and build output (re-created by npm).
+node_modules/
+.next/
+build/
+
+# Operating systems.
+.DS_Store
+Thumbs.db
