@@ -156,8 +156,3 @@ routes:  {"dense": {"rank": 3, "score": 0.71}, "keyword": {...}}   被哪几路�
 - 在完整语料上调各路权重和 `low_confidence` 阈值（目前是 0.40）。
 - 测试 reranker，决定是否默认开启。
 - keyword 路用的是 PostgreSQL 的 `ts_rank`，效果接近 BM25，但不是严格的 BM25。
-
-## 在 ingestion 部分发现的问题（转告 Juliette）
-
-- `ingestion/repository.py`：三条 `INSERT` 语句缺了 `VALUES (...)` 部分（可能是最后一次 commit 误删），导致 `ingest.py` 无法运行。现有的 dump 不受影响。
-- 部分 Windows 电脑上只能用 `docker-compose`，不能用 `docker compose`，所以 `start_database.py` 和 `share_database.py` 会报错。临时办法：手动运行 `docker-compose up -d`。
